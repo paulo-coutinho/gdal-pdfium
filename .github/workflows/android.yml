@@ -31,6 +31,11 @@ jobs:
       - name: Python requirements
         run: pip install -r requirements.txt
 
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.20.0"
+
       - name: Build
         run: python make.py ${{ matrix.config.target }}-build
 
