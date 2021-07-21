@@ -1,11 +1,11 @@
 # GDAL + PDFium
 
-Project that compiles GDAL with PDFium backend.
 
 [![Android](https://github.com/paulo-coutinho/gdal-pdfium/actions/workflows/android.yml/badge.svg)](https://github.com/paulo-coutinho/gdal-pdfium/actions/workflows/android.yml)
-
 [![iOS](https://github.com/paulo-coutinho/gdal-pdfium/actions/workflows/ios.yml/badge.svg)](https://github.com/paulo-coutinho/gdal-pdfium/actions/workflows/ios.yml)
 
+
+Project that compiles GDAL with PDFium backend.
 
 ## Requirements
 
