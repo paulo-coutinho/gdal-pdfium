@@ -13,7 +13,7 @@ Project that compiles GDAL with PDFium backend.
 - PIP
 - CMake 3
 - Conan 1.18
-- Darwin toolchain (iOS only): 
+- Darwin Toolchain (iOS only): 
 
     ```conan remote add ezored https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local```
 

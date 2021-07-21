@@ -54,6 +54,8 @@ def run_task_build():
                 "os.api_level={0}".format(arch["api_level"]),
                 "-s:h",
                 "build_type={0}".format("Release"),
+                "-o",
+                "proj:with_curl={0}".format(False),                
                 "--build=missing",
                 "--update",
             ]

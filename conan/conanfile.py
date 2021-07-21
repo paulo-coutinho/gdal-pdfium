@@ -16,8 +16,8 @@ class GdalConan(ConanFile):
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "patches/**"
-    generators = "pkg_config"
-    version = "3.3.1"
+    generators = "cmake"
+    version = "3.2.1"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -328,6 +328,10 @@ class GdalConan(ConanFile):
             self.requires("openexr/2.5.5")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.12.0")
+
+        print("---------------------------")
+        print(self.requires)
+        print("---------------------------")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
