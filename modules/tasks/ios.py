@@ -61,6 +61,8 @@ def run_task_build():
                 "darwin-toolchain:enable_visibility={0}".format(True),
                 "-o",
                 "proj:with_curl={0}".format(False),
+                "-o",
+                "proj:build_executables={0}".format(False),
                 "--build=missing",
                 "--update",
             ]

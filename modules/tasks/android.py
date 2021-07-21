@@ -55,7 +55,9 @@ def run_task_build():
                 "-s:h",
                 "build_type={0}".format("Release"),
                 "-o",
-                "proj:with_curl={0}".format(False),                
+                "proj:with_curl={0}".format(False),
+                "-o",
+                "proj:build_executables={0}".format(False),
                 "--build=missing",
                 "--update",
             ]
