@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: artifact-${{ matrix.config.target }}
-          path: build/${{ matrix.config.target }}
+          path: build/${{ matrix.config.target }}/out/gdal-${{ matrix.config.target }}.tar.gz
 
       - name: Get release
         id: get_release
@@ -60,6 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.config.target }}/dist.tar.gz
+          asset_path: build/${{ matrix.config.target }}/out/gdal-${{ matrix.config.target }}.tar.gz
           asset_name: ${{ matrix.config.target }}.tar.gz
           asset_content_type: application/tar+gzip

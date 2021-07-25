@@ -34,9 +34,5 @@ endif()
 set(SOURCE_FILES ../src/main.cpp)
 
 # Library
-add_library(gdal SHARED ${SOURCE_FILES})
+add_library(gdal STATIC ${SOURCE_FILES})
 target_link_libraries(gdal "${CONAN_LIBS}")
-
-if (TARGET_NAME STREQUAL "ios")
-    set_target_properties(gdal PROPERTIES FRAMEWORK TRUE PUBLIC_HEADER "")
-endif()
