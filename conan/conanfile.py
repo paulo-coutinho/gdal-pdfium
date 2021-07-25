@@ -562,7 +562,7 @@ class GdalConan(ConanFile):
             )
 
         # PDFium (Android)
-        if self.settings.os == "iOS" or self.settings.os == "Android":
+        if self.settings.os == "Android":
             configure_file = os.path.join(
                 self._source_subfolder,
                 "configure.ac",
