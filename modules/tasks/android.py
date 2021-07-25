@@ -221,6 +221,8 @@ def get_pdfium():
     pdfium_file = os.path.join(build_dir, "android.tgz")
     pdfium_url = "https://github.com/paulo-coutinho/pdfium-lib/releases/download/4584-gdal/android.tgz"
 
+    file.create_dir(build_dir)
+
     if file.file_exists(pdfium_file):
         log.info("PDFium file already downloaded")
     else:
