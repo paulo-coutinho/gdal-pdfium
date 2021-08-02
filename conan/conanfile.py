@@ -549,11 +549,11 @@ class GdalConan(ConanFile):
                 "configure.ac",
             )
 
-            # tools.replace_in_file(
-            #     configure_file,
-            #     'PDFIUM_LIB="$PDFIUM_LIB -ljpeg -lpng -lz -llcms2 -lpthread -lm -lstdc++"',
-            #     'PDFIUM_LIB="$PDFIUM_LIB -lz -lpthread -lm -lstdc++"',
-            # )
+            tools.replace_in_file(
+                configure_file,
+                'PDFIUM_LIB="$PDFIUM_LIB -ljpeg -lpng -lz -llcms2 -lpthread -lm -lstdc++"',
+                'PDFIUM_LIB="$PDFIUM_LIB -lz -lpthread -lm -lstdc++"',
+            )
 
             tools.replace_in_file(
                 configure_file,
@@ -568,11 +568,11 @@ class GdalConan(ConanFile):
                 "configure.ac",
             )
 
-            # tools.replace_in_file(
-            #     configure_file,
-            #     'PDFIUM_LIB="$PDFIUM_LIB -ljpeg -lpng -lz -llcms2 -lpthread -lm -lstdc++"',
-            #     'PDFIUM_LIB="$PDFIUM_LIB -lz -lm -lstdc++"',
-            # )
+            tools.replace_in_file(
+                configure_file,
+                'PDFIUM_LIB="$PDFIUM_LIB -ljpeg -lpng -lz -llcms2 -lpthread -lm -lstdc++"',
+                'PDFIUM_LIB="$PDFIUM_LIB -lz -lm -lstdc++"',
+            )
 
         # PDFium (iOS and Android)
         if self.settings.os == "iOS" or self.settings.os == "Android":
