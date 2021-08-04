@@ -213,15 +213,6 @@ class GdalConan(ConanFile):
         self.options["proj"].build_executables = False
         self.options["libtiff"].lzma = False
 
-        if self.settings.os == "iOS":
-            if self.settings.arch in ["x86", "x86_64"]:
-                self.options["darwin-toolchain"].enable_bitcode = False
-            else:
-                self.options["darwin-toolchain"].enable_bitcode = True
-
-            self.options["darwin-toolchain"].enable_arc = True
-            self.options["darwin-toolchain"].enable_visibility = True
-
     def _strict_options_requirements(self):
         if self.options.with_qhull:
             self.options["qhull"].reentrant = False
@@ -418,9 +409,6 @@ class GdalConan(ConanFile):
                 "CONAN_BASH_PATH"
             ):
                 self.build_requires("msys2/cci.latest")
-
-        if self._settings_build.os == "iOS":
-            self.build_requires("darwin-toolchain/1.3.0")
 
     def source(self):
         tools.get(
