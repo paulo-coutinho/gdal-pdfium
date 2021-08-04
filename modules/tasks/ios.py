@@ -8,6 +8,8 @@ import modules.log as log
 import modules.runner as runner
 import modules.net as net
 import modules.pack as pack
+import modules.deps as deps
+import modules.config as config
 
 
 def run_task_build():
@@ -18,7 +20,8 @@ def run_task_build():
     target_name = "ios"
     build_dir = os.path.join(root_dir, "build", target_name)
     conan_dir = os.path.join(root_dir, "conan")
-    conan_file = os.path.join(conan_dir, "conanfile.py")
+    conan_gdal_file = os.path.join(conan_dir, "gdal", "conanfile.py")
+    conan_project_file = os.path.join(conan_dir, "project", "conanfile.py")
     pdfium_dir = os.path.join(root_dir, "build", "pdfium", "release")
     profile_dir = os.path.join(root_dir, "profile")
     profile_host = os.path.join(profile_dir, "{0}-profile".format(target_name))
@@ -28,7 +31,7 @@ def run_task_build():
     lib_merge_include_dir = ""
 
     # get pdfium
-    get_pdfium()
+    deps.get_pdfium("ios")
 
     # build for all archs
     archs = {}
@@ -70,25 +73,26 @@ def run_task_build():
             arch["name"],
         )
 
-        # dependency
+        # conan - dependencies
         log.info("Building dependencies for {0}...".format(arch["name"]))
 
-        conan_dir = os.path.join(
+        conan_build_dir = os.path.join(
             dist_dir,
             "conan",
         )
+
+        file.remove_dir(conan_build_dir)
+        file.create_dir(conan_build_dir)
 
         pdfium_arch_dir = os.path.join(
             pdfium_dir,
             arch["pdfium_arch"],
         )
 
-        file.create_dir(conan_dir)
-
         run_args = [
             "conan",
             "create",
-            conan_file,
+            conan_gdal_file,
             "-pr:b",
             profile_build,
             "-pr:h",
@@ -110,38 +114,78 @@ def run_task_build():
             "--build=missing",
             "--test-folder=None",
         ]
-        runner.run(run_args, conan_dir)
+
+        runner.run(run_args, conan_build_dir)
+
+        # conan - project
+        log.info("Building project files for {0}...".format(arch["name"]))
+
+        run_args = [
+            "conan",
+            "install",
+            conan_project_file,
+            "-pr:b",
+            profile_build,
+            "-pr:h",
+            profile_host,
+            "-s:h",
+            "arch={0}".format(arch["conan_arch"]),
+            "-s:h",
+            "build_type={0}".format("Release"),
+            "-s:h",
+            "os.version={0}".format(arch["os_version"]),
+            "-o",
+            "darwin-toolchain:enable_bitcode={0}".format(arch["bitcode"]),
+            "-o",
+            "darwin-toolchain:enable_arc={0}".format(True),
+            "-o",
+            "darwin-toolchain:enable_visibility={0}".format(True),
+            "-o",
+            "project_config_arch={0}".format(arch["conan_arch"]),
+            "-o",
+            "project_config_target={0}".format(target_name),
+            "-o",
+            "project_config_pdfium={0}".format(pdfium_arch_dir),
+            "--build=missing",
+            "--update",
+        ]
+        runner.run(run_args, conan_build_dir)
+
+        # build
+        log.info("Building library for {0}...".format(arch["name"]))
+
+        cmake_dir = os.path.join(
+            root_dir,
+            "cmake",
+        )
+
+        target_dir = os.path.join(
+            dist_dir,
+            "target",
+        )
+
+        file.remove_dir(target_dir)
+        file.create_dir(target_dir)
+
+        run_args = [
+            "conan",
+            "build",
+            conan_project_file,
+            "--source-folder",
+            cmake_dir,
+            "--build-folder",
+            target_dir,
+            "--install-folder",
+            conan_build_dir,
+        ]
+
+        runner.run(run_args, target_dir)
 
         # get dependency info
         log.info("Searching compiled library for {0}...".format(arch["name"]))
 
-        run_args = [
-            "conan",
-            "search",
-            "gdal/3.3.1@",
-            "-q",
-            "(arch={0}) AND (os={1})".format(
-                arch["conan_arch"],
-                arch["conan_os"],
-            ),
-        ]
-
-        result = subprocess.run(run_args, stdout=subprocess.PIPE)
-        output = result.stdout.decode()
-
-        package_data = re.findall("(Package_ID:\s)(\w*)", output)
-        package_id = package_data[0][1]
-
-        package_dir = os.path.join(
-            file.home_dir(),
-            ".conan",
-            "data",
-            "gdal",
-            "3.3.1",
-            "_",
-            "_",
-            "package",
-            package_id,
+        conan_gdal_dir = deps.get_conan_dep_dir(
+            "gdal", "3.3.1", arch["conan_arch"], arch["conan_os"]
         )
 
         # copy data
@@ -156,32 +200,32 @@ def run_task_build():
         file.create_dir(out_arch_dir)
 
         file.copy_dir(
-            os.path.join(package_dir, "lib"),
+            os.path.join(target_dir, "lib"),
             os.path.join(out_arch_dir, "lib"),
         )
 
         file.copy_dir(
-            os.path.join(package_dir, "include"),
+            os.path.join(conan_gdal_dir, "include"),
             os.path.join(out_arch_dir, "include"),
         )
 
         lib_merge_list.append(
             os.path.join(
-                package_dir,
+                out_arch_dir,
                 "lib",
-                "libgdal.a",
+                "libgdalpdf.dylib",
             )
         )
 
-        lib_merge_include_dir = os.path.join(package_dir, "include")
+        lib_merge_include_dir = os.path.join(out_arch_dir, "include")
 
-    # copy data
+    # merge libraries
     log.info("Merging libraries (lipo)...")
 
     out_final_dir = os.path.join(out_dir, "gdal-{0}".format(target_name))
     lib_final_dir = os.path.join(out_final_dir, "lib")
     include_final_dir = os.path.join(out_final_dir, "include")
-    lib_final_path = os.path.join(lib_final_dir, "libgdal.a")
+    lib_final_path = os.path.join(lib_final_dir, "libgdalpdf.dylib")
 
     file.remove_dir(out_final_dir)
     file.create_dir(out_final_dir)
@@ -220,29 +264,3 @@ def check_cmake():
     except OSError:
         log.error("CMake is not installed, check: https://www.cmake.org/")
         return False
-
-
-def get_pdfium():
-    log.info("Downloading PDFium...")
-
-    root_dir = file.root_dir()
-    build_dir = os.path.join(root_dir, "build")
-    pdfium_dir = os.path.join(build_dir, "pdfium")
-    pdfium_file = os.path.join(build_dir, "ios.tgz")
-    pdfium_url = "https://github.com/paulo-coutinho/pdfium-lib/releases/download/4584-gdal/ios.tgz"
-
-    file.create_dir(build_dir)
-
-    if file.file_exists(pdfium_file):
-        log.info("PDFium file already downloaded")
-    else:
-        net.download(pdfium_url, pdfium_file)
-        log.info("PDFium downloaded")
-
-    log.info("Extracting PDFium...")
-
-    if file.dir_exists(pdfium_dir):
-        log.info("PDFium already extracted")
-    else:
-        pack.unpack(pdfium_file, pdfium_dir)
-        log.info("PDFium extracted")

@@ -190,6 +190,7 @@ class GdalConan(ConanFile):
 
         self.options["proj"].with_curl = False
         self.options["proj"].build_executables = False
+        self.options["libtiff"].lzma = False
 
     def configure(self):
         if self.options.shared:
@@ -559,6 +560,12 @@ class GdalConan(ConanFile):
                 configure_file,
                 'TEST_CXX_FLAGS="$TEST_CXX_FLAGS -stdlib=libstdc++"',
                 'TEST_CXX_FLAGS="$TEST_CXX_FLAGS -framework Foundation -framework CoreGraphics -stdlib=libc++"',
+            )
+
+            tools.replace_in_file(
+                configure_file,
+                'if test "${HAVE_BIGTIFF}" != "yes" ; then',
+                'if false ; then',
             )
 
         # PDFium (Android)
