@@ -36,13 +36,13 @@ def run_task_build():
     # build for all archs
     archs = {}
 
-    archs["x86_64"] = {
-        "name": "x86_64",
-        "conan_arch": "x86_64",
+    archs["armv7"] = {
+        "name": "armv7",
+        "conan_arch": "armv7",
         "os_version": "9.0",
-        "pdfium_arch": "x64",
+        "pdfium_arch": "arm",
         "conan_os": "iOS",
-        "bitcode": False,
+        "bitcode": True,
     }
 
     archs["armv8"] = {
@@ -54,17 +54,17 @@ def run_task_build():
         "bitcode": True,
     }
 
-    archs["armv7"] = {
-        "name": "armv7",
-        "conan_arch": "armv7",
+    archs["x86_64"] = {
+        "name": "x86_64",
+        "conan_arch": "x86_64",
         "os_version": "9.0",
-        "pdfium_arch": "arm",
+        "pdfium_arch": "x64",
         "conan_os": "iOS",
-        "bitcode": True,
+        "bitcode": False,
     }
 
-    for arch in archs:
-        arch = archs[arch]
+    for arch_item in archs:
+        arch = archs[arch_item]
 
         log.info("Building for {0}...".format(arch["name"]))
 
@@ -114,7 +114,6 @@ def run_task_build():
             "--build=missing",
             "--test-folder=None",
         ]
-
         runner.run(run_args, conan_build_dir)
 
         # conan - project
@@ -178,7 +177,6 @@ def run_task_build():
             "--install-folder",
             conan_build_dir,
         ]
-
         runner.run(run_args, target_dir)
 
         # get dependency info
@@ -230,6 +228,7 @@ def run_task_build():
     file.remove_dir(out_final_dir)
     file.create_dir(out_final_dir)
 
+    file.remove_dir(lib_final_dir)
     file.create_dir(lib_final_dir)
 
     run_args = ["lipo", "-create"]

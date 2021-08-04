@@ -558,8 +558,8 @@ class GdalConan(ConanFile):
 
             tools.replace_in_file(
                 configure_file,
-                'TEST_CXX_FLAGS="$TEST_CXX_FLAGS -stdlib=libstdc++"',
-                'TEST_CXX_FLAGS="$TEST_CXX_FLAGS -framework Foundation -framework CoreGraphics -stdlib=libc++"',
+                'if ${CXX} ${CXXFLAGS} ${CPPFLAGS} $TEST_CXX_FLAGS',
+                'if ${CXX} ${CXXFLAGS} ${CPPFLAGS} $TEST_CXX_FLAGS -framework Foundation -framework CoreGraphics',
             )
 
             tools.replace_in_file(
@@ -592,12 +592,6 @@ class GdalConan(ConanFile):
                 configure_file,
                 'PDFIUM_LIB="-stdlib=libstdc++ $PDFIUM_LIB"',
                 'PDFIUM_LIB="$PDFIUM_LIB -stdlib=libc++"',
-            )
-
-            tools.replace_in_file(
-                configure_file,
-                "    if ${CXX} ${CXXFLAGS} ${CPPFLAGS} $TEST_CXX_FLAGS -std=c++14 testpdfium.cpp -o testpdfium ${PDFIUM_INC} ${PDFIUM_LIB} >/dev/null 2>/dev/null; then",
-                '    echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++"\n    echo "${CXX} ${CXXFLAGS} ${CPPFLAGS} $TEST_CXX_FLAGS -std=c++14 testpdfium.cpp -o testpdfium ${PDFIUM_INC} ${PDFIUM_LIB}"\n    echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++"\n    if ${CXX} ${CXXFLAGS} ${CPPFLAGS} $TEST_CXX_FLAGS -std=c++14 testpdfium.cpp -o testpdfium ${PDFIUM_INC} ${PDFIUM_LIB} >/dev/null 2>/dev/null; then',
             )
 
 
