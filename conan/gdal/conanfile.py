@@ -188,18 +188,6 @@ class GdalConan(ConanFile):
         if not self._has_with_heif_option:
             del self.options.with_heif
 
-        self.options["proj"].with_curl = False
-        self.options["proj"].build_executables = False
-        self.options["libtiff"].lzma = False
-
-        if self.settings.arch in ["x86", "x86_64"]:
-            self.options["darwin-toolchain"].enable_bitcode = False
-        else:
-            self.options["darwin-toolchain"].enable_bitcode = True
-
-        self.options["darwin-toolchain"].enable_arc = True
-        self.options["darwin-toolchain"].enable_visibility = True
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -218,7 +206,21 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
+
         self._strict_options_requirements()
+
+        self.options["proj"].with_curl = False
+        self.options["proj"].build_executables = False
+        self.options["libtiff"].lzma = False
+
+        if self.settings.os == "iOS":
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.options["darwin-toolchain"].enable_bitcode = False
+            else:
+                self.options["darwin-toolchain"].enable_bitcode = True
+
+            self.options["darwin-toolchain"].enable_arc = True
+            self.options["darwin-toolchain"].enable_visibility = True
 
     def _strict_options_requirements(self):
         if self.options.with_qhull:
