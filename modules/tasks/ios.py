@@ -220,10 +220,10 @@ def run_task_build():
         lib_merge_include_dir = os.path.join(conan_gdal_dir, "include")
 
     # merge libraries
-    log.info("Merging libraries (xcframework)...")
+    log.info("Merging libraries (lipo)...")
 
     out_final_dir = os.path.join(out_dir, "gdal-{0}".format(target_name))
-    lib_final_dir = os.path.join(out_final_dir, "lib", "gdalpdf.xcframework")
+    lib_final_dir = os.path.join(out_final_dir, "lib", "gdalpdf.framework")
     include_final_dir = os.path.join(out_final_dir, "include")
     lib_final_path = os.path.join(lib_final_dir, "gdalpdf")
 
