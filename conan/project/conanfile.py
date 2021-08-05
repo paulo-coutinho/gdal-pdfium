@@ -23,7 +23,11 @@ class TargetConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self)
+        if self.settings.os in ["iOS"]:
+            cmake = CMake(self)
+        else:
+            cmake = CMake(self)
+
         cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         cmake.definitions["PROJECT_CONFIG_TARGET"] = self.options.get_safe("project_config_target")
         cmake.definitions["PROJECT_CONFIG_ARCH"] = self.options.get_safe("project_config_arch")

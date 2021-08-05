@@ -42,7 +42,7 @@ set(SOURCE_FILES ../src/main.cpp)
 message(STATUS "Conan Libraries: ${CONAN_LIBS}")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
-if(APPLE)
+if (PROJECT_CONFIG_TARGET STREQUAL "ios")
     target_link_libraries(${PROJECT_NAME} PUBLIC "${CONAN_LIBS_GDAL}")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${CONAN_LIBS_JSON-C}")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${CONAN_LIBS_LIBGEOTIFF}")
@@ -65,6 +65,26 @@ if(APPLE)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE "iconv")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework CoreGraphics")
+
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        CXX_EXTENSIONS NO
+        CXX_VISIBILITY_PRESET default
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION A
+        MACOSX_FRAMEWORK_BUNDLE_VERSION "1.0.0"
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING "1.0.0"
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED NO
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+        XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH YES
+        #XCODE_ATTRIBUTE_SKIP_INSTALL YES
+        XCODE_ATTRIBUTE_INSTALL_PATH "@loader_path/Frameworks"
+        VERSION "1.0.0"
+        SOVERSION "1.0.0"
+    )
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_NAME_DIR "@rpath")
 endif()
 
 # PDFium
@@ -79,4 +99,11 @@ elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-all_load")
 else()
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--whole-archive")
+endif()
+
+# Copy headers
+file(GLOB PUBLIC_GDAL_FILES "${CONAN_INCLUDE_DIRS_GDAL}/*.h")
+
+if (PROJECT_CONFIG_TARGET STREQUAL "ios")
+    file(COPY ${PUBLIC_GDAL_FILES} DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PROJECT_NAME}.framework/Headers")
 endif()

@@ -202,28 +202,30 @@ def run_task_build():
             os.path.join(out_arch_dir, "lib"),
         )
 
-        file.copy_dir(
-            os.path.join(conan_gdal_dir, "include"),
-            os.path.join(out_arch_dir, "include"),
-        )
+        # file.copy_dir(
+        #     os.path.join(conan_gdal_dir, "include"),
+        #     os.path.join(out_arch_dir, "include"),
+        # )
 
         lib_merge_list.append(
             os.path.join(
                 out_arch_dir,
                 "lib",
-                "libgdalpdf.dylib",
+                "gdalpdf.framework",
+                "gdalpdf",
             )
         )
 
-        lib_merge_include_dir = os.path.join(out_arch_dir, "include")
+        lib_merge_lib_dir = os.path.join(out_arch_dir, "lib", "gdalpdf.framework")
+        lib_merge_include_dir = os.path.join(conan_gdal_dir, "include")
 
     # merge libraries
-    log.info("Merging libraries (lipo)...")
+    log.info("Merging libraries (xcframework)...")
 
     out_final_dir = os.path.join(out_dir, "gdal-{0}".format(target_name))
-    lib_final_dir = os.path.join(out_final_dir, "lib")
+    lib_final_dir = os.path.join(out_final_dir, "lib", "gdalpdf.xcframework")
     include_final_dir = os.path.join(out_final_dir, "include")
-    lib_final_path = os.path.join(lib_final_dir, "libgdalpdf.dylib")
+    lib_final_path = os.path.join(lib_final_dir, "gdalpdf")
 
     file.remove_dir(out_final_dir)
     file.create_dir(out_final_dir)
@@ -231,14 +233,19 @@ def run_task_build():
     file.remove_dir(lib_final_dir)
     file.create_dir(lib_final_dir)
 
+    file.copy_dir(lib_merge_lib_dir, lib_final_dir)
+
     run_args = ["lipo", "-create"]
     run_args += lib_merge_list
     run_args += ["-o", lib_final_path]
     runner.run(run_args, root_dir)
 
     # copy data
-    log.info("Copying headers...")
-    file.copy_dir(lib_merge_include_dir, include_final_dir)
+    # log.info("Copying headers...")
+    # file.remove_dir(include_final_dir)
+    # file.create_dir(include_final_dir)
+
+    # file.copy_dir(lib_merge_include_dir, include_final_dir)
 
     # archive
     log.info("Archiving...")
