@@ -212,6 +212,7 @@ class GdalConan(ConanFile):
         self.options["proj"].with_curl = False
         self.options["proj"].build_executables = False
         self.options["libtiff"].lzma = False
+        self.options["libpng"].neon = False        
 
     def _strict_options_requirements(self):
         if self.options.with_qhull:
