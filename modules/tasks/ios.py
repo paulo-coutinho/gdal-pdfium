@@ -240,6 +240,56 @@ def run_task_build():
     run_args += ["-o", lib_final_path]
     runner.run(run_args, root_dir)
 
+    # create xcframework
+    log.info("Creting xcframework...")
+
+    ios_lib_final_dir = os.path.join(out_final_dir, "lib-ios", "gdalpdf.framework")
+    sim_lib_final_dir = os.path.join(out_final_dir, "lib-sim", "gdalpdf.framework")
+    xcframework_final_dir = os.path.join(
+        out_final_dir, "xcframework", "gdalpdf.xcframework"
+    )
+
+    file.copy_dir(lib_final_dir, ios_lib_final_dir)
+    file.copy_dir(lib_final_dir, sim_lib_final_dir)
+
+    run_args = [
+        "lipo",
+        "-remove",
+        "x86_64",
+        os.path.join(ios_lib_final_dir, "gdalpdf"),
+        "-o",
+        os.path.join(ios_lib_final_dir, "gdalpdf"),
+    ]
+    runner.run(run_args, root_dir)
+
+    run_args = [
+        "lipo",
+        "-remove",
+        "armv7",
+        os.path.join(sim_lib_final_dir, "gdalpdf"),
+        "-o",
+        os.path.join(sim_lib_final_dir, "gdalpdf"),
+    ]
+    runner.run(run_args, root_dir)
+
+    run_args = [
+        "lipo",
+        "-remove",
+        "arm64",
+        os.path.join(sim_lib_final_dir, "gdalpdf"),
+        "-o",
+        os.path.join(sim_lib_final_dir, "gdalpdf"),
+    ]
+    runner.run(run_args, root_dir)
+
+    run_args = ["xcodebuild", "-create-xcframework"]
+    run_args += ["-framework", ios_lib_final_dir]
+    run_args += ["-framework", sim_lib_final_dir]
+    run_args += ["-output", xcframework_final_dir]
+    runner.run(run_args, root_dir)
+
+    out_final_dir = xcframework_final_dir
+
     # copy data
     # log.info("Copying headers...")
     # file.remove_dir(include_final_dir)
@@ -256,7 +306,6 @@ def run_task_build():
     tar.add(
         name=out_final_dir,
         arcname=os.path.basename(out_final_dir),
-        filter=lambda x: (None if "_" in x.name and not x.name.endswith(".h") else x),
     )
 
     tar.close()
